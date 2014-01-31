@@ -317,7 +317,6 @@ std::string HelpMessage()
         "  -onlynet=<net>         " + _("Only connect to nodes in network <net> (IPv4, IPv6 or Tor)") + "\n" +
         "  -discover              " + _("Discover own IP address (default: 1 when listening and no -externalip)") + "\n" +
         "  -checkpoints           " + _("Only accept block chain matching built-in checkpoints (default: 1)") + "\n" +
-        "  -irc                   " + _("Find peers using internet relay chat (default: 0)") + "\n" +
         "  -listen                " + _("Accept connections from outside (default: 1 if no -proxy or -connect)") + "\n" +
         "  -bind=<addr>           " + _("Bind to given address and always listen on it. Use [host]:port notation for IPv6") + "\n" +
         "  -dnsseed               " + _("Find peers using DNS lookup (default: 1 unless -connect)") + "\n" +
@@ -342,6 +341,7 @@ std::string HelpMessage()
         "  -daemon                " + _("Run in the background as a daemon and accept commands") + "\n" +
 #endif
         "  -testnet               " + _("Use the test network") + "\n" +
+        "  -debuglog              " + +("Write out the debug.log file") + "\n" +
         "  -debug                 " + _("Output extra debugging information. Implies all other -debug* options") + "\n" +
         "  -debugnet              " + _("Output extra network debugging information") + "\n" +
         "  -logtimestamps         " + _("Prepend debug output with timestamp (default: 1)") + "\n" +
@@ -509,12 +509,6 @@ bool AppInit2(boost::thread_group& threadGroup)
     if (fBloomFilters)
         nLocalServices |= NODE_BLOOM;
 
-    // FedoraCoin: Keep irc seeding on by default for now.
-//    if (fTestNet)
-//    {
-        SoftSetBoolArg("-irc", true);
-//    }
-
     if (mapArgs.count("-bind")) {
         // when specifying an explicit binding address, you want to listen on it
         // even when -connect or -proxy is specified
@@ -561,6 +555,8 @@ bool AppInit2(boost::thread_group& threadGroup)
     // ********************************************************* Step 3: parameter-to-internal-flags
 
     fDebug = GetBoolArg("-debug");
+    bool defaultWriteToLog = GetBoolArg("-server") || GetBoolArg("-daemon");
+    fWriteDebugLog = fDebug ? fDebug : GetBoolArg("-debuglog", defaultWriteToLog);
     fBenchmark = GetBoolArg("-benchmark");
 
     // -par=0 means autodetect, but nScriptCheckThreads==0 means no concurrency
